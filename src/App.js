@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
-import Header     from './components/layout/Header';
-import Sidebar    from './components/layout/Sidebar';
+import Header      from './components/layout/Header';
+import Sidebar     from './components/layout/Sidebar';
 import { CursorBubble, StarField } from './components/ui/CursorBubble';
 
 // Public pages
@@ -18,7 +18,9 @@ import Reports    from './pages/Reports';
 import Alerts     from './pages/Alerts';
 import Settings   from './pages/Settings';
 
-// Routes that do NOT show the header/sidebar shell
+// H9 fix — 404 catch-all
+import NotFound from './pages/NotFound';
+
 const PUBLIC_ROUTES = ['/', '/login', '/signup'];
 
 function AppShell() {
@@ -26,39 +28,35 @@ function AppShell() {
   const isPublic = PUBLIC_ROUTES.includes(location.pathname);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Public pages — no shell
   if (isPublic) {
     return (
       <Routes>
         <Route path="/"       element={<LandingPage />} />
         <Route path="/login"  element={<LoginPage />}   />
         <Route path="/signup" element={<SignupPage />}  />
+        {/* H9 fix — catch undefined public routes too */}
+        <Route path="*"       element={<NotFound />}    />
       </Routes>
     );
   }
 
-  // App pages — with header + sidebar shell
   return (
     <div className="app-layout">
       <StarField />
       <CursorBubble />
-
       <Header onMenuToggle={() => setSidebarOpen(o => !o)} />
-
       <div className="main-container">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main className="content-area">
           <Routes>
-            {/* /dashboard is the correct app entry — separate from landing "/" */}
             <Route path="/dashboard" element={<Dashboard />}  />
             <Route path="/analytics" element={<Analytics />}  />
             <Route path="/upload"    element={<UploadData />} />
             <Route path="/reports"   element={<Reports />}    />
             <Route path="/alerts"    element={<Alerts />}     />
             <Route path="/settings"  element={<Settings />}   />
+            {/* H9 fix — catch undefined app routes */}
+            <Route path="*"          element={<NotFound />}   />
           </Routes>
         </main>
       </div>
